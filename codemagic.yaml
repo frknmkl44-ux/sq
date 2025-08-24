@@ -1,0 +1,36 @@
+workflows:
+  ios_release:
+    name: iOS Release
+    environment:
+      flutter: stable
+      xcode: 15.4
+    scripts:
+      - name: Clean Flutter & iOS pods
+        script: |
+          flutter clean
+          rm -rf ios/Pods ios/Podfile.lock ios/.symlinks
+          rm -rf ~/Library/Developer/Xcode/DerivedData/*
+          flutter pub get
+      - name: Print Xcode version
+        script: |
+          xcodebuild -version
+      - name: CocoaPods repo update
+        script: |
+          cd ios
+          pod repo update
+      - name: Pod install
+        script: |
+          cd ios
+          pod install --repo-update
+      - name: Build iOS (release)
+        script: |
+          flutter build ipa --release
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_API_KEY
+        key_id: $APP_STORE_CONNECT_KEY_ID
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+
+
